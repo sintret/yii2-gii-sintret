@@ -53,12 +53,22 @@ class <?= $className ?> extends <?= '\\' . ltrim($generator->baseClass, '\\') . 
     }
 <?php endif; ?>
 
+    
+    <?php 
+    $viewRule = "";
+    foreach ($labels as $name => $label) {
+        if($name=='image'){
+            $viewRule .= ", \n";
+            $viewRule .= "[['image'], 'file', 'extensions' => 'jpg,png,gif'],";
+        }
+    }
+    ?>
     /**
      * @inheritdoc
      */
     public function rules()
     {
-        return [<?= "\n            " . implode(",\n            ", $rules) . "\n        " ?>];
+        return [<?= "\n            " . implode(",\n            ", $rules) . "\n   ".$viewRule."     " ?>];
     }
 
     /**
@@ -83,39 +93,6 @@ class <?= $className ?> extends <?= '\\' . ltrim($generator->baseClass, '\\') . 
     }
 <?php endforeach; ?>
     
-    <?php if($column->name == 'image'){ ?>
-    public static $imagePath = '@webroot/images/<?= strtolower($className) ?>/';
-
-    public function getImageTrue() {
-        if ($this->image) {
-            return Yii::getAlias($this->image);
-        }
-    }
-
-    public function getThumbnailTrue() {
-        if ($this->image) {
-            $name = \yii\helpers\StringHelper::basename($this->image);
-            $dir = \yii\helpers\StringHelper::dirname($this->image);
-            return Yii::getAlias($dir . '/thumb/' . $name);
-        }
-    }
-    public function getThumb() {
-        if ($this->thumbnailTrue) {
-            return \yii\helpers\Html::img($this->thumbnailTrue, ['width' => '100px']);
-        }
-    }
-    public function behaviors() {
-        return [
-            'image' => [
-                'class' => \sintret\gii\components\CropBehavior::className(),
-                'paths' => self::$imagePath . '{id}/',
-                'width'=>200,
-            ],
-        ];
-    }
-    
-    <?php } ?>
-    
 <?php if ($queryClassName): ?>
 <?php
     $queryClassFullName = ($generator->ns === $generator->queryNs) ? $queryClassName : '\\' . $generator->queryNs . '\\' . $queryClassName;
@@ -130,4 +107,42 @@ class <?= $className ?> extends <?= '\\' . ltrim($generator->baseClass, '\\') . 
         return new <?= $queryClassFullName ?>(get_called_class());
     }
 <?php endif; ?>
+    
+    
+<?php foreach ($labels as $name => $label): ?>
+
+    <?php if ($name == 'image') { ?>
+        public static $imagePath = '@webroot/images/<?= strtolower($className) ?>/';
+
+        public function getImageTrue() {
+        if ($this->image) {
+        return Yii::getAlias($this->image);
+        }
+        }
+
+        public function getThumbnailTrue() {
+        if ($this->image) {
+        $name = \yii\helpers\StringHelper::basename($this->image);
+        $dir = \yii\helpers\StringHelper::dirname($this->image);
+        return Yii::getAlias($dir . '/thumb/' . $name);
+        }
+        }
+        public function getThumb() {
+        if ($this->thumbnailTrue) {
+        return \yii\helpers\Html::img($this->thumbnailTrue, ['width' => '100px']);
+        }
+        }
+        public function behaviors() {
+        return [
+        'image' => [
+        'class' => \sintret\gii\components\CropBehavior::className(),
+        'paths' => self::$imagePath . '{id}/',
+        'width'=>200,
+        ],
+        ];
+        }
+
+    <?php } ?>
+
+<?php endforeach; ?>
 }
