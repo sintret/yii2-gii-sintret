@@ -74,7 +74,26 @@ if (($tableSchema = $generator->getTableSchema()) === false) {
         $name = $column->name;
         if($name=='image'){ ?>
             ['attribute' => 'image', 'format' => 'html', 'value' => function($data) { return $data->thumb;}],
-        <?php } else 
+        <?php }  else if($name=='userUpdate'){ ?> 
+            [
+                        'attribute'=>'userUpdate',
+                        'filter'=>  User::dropdown(),
+                        'value' => function ($data){
+                            return Yii::$app->util->getUserId($data->userUpdate)->username;
+                        }
+                        ],
+        <?php }  else if($name=='userCreate'){ ?> 
+            [
+                        'attribute'=>'userCreate',
+                        'filter'=>  User::dropdown(),
+                        'value' => function ($data){
+                            return Yii::$app->util->getUserId($data->userCreate)->username;
+                        }
+                        ],
+        <?php }  else if($name=='description'){ ?> 
+            'description:html',
+        <?php }       
+            else 
             //echo "            '" . $format . "',\n";
         
             echo "            '" . $column->name . ($format === 'text' ? "" : ":" . $format) . "',\n";
