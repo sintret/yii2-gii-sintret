@@ -13,6 +13,7 @@ echo "<?php\n";
 
 use yii\helpers\Html;
 use yii\widgets\DetailView;
+use app\models\User;
 
 /* @var $this yii\web\View */
 /* @var $model <?= ltrim($generator->modelClass, '\\') ?> */
@@ -40,18 +41,101 @@ $this->params['breadcrumbs'][] = $this->title;
         'model' => $model,
         'attributes' => [
 <?php
+
 if (($tableSchema = $generator->getTableSchema()) === false) {
     foreach ($generator->getColumnNames() as $name) {
-        echo "            '" . $name . "',\n";
+        
+        if($name=='image'){
+            echo "        [
+            'attribute' => 'image',
+            'format' => 'image',
+            'value' => $model->thumbnailTrue, \n"
+                    . "]\n";
+           
+        } elseif($name=='userCreate'){
+            echo "      [
+            'attribute' => 'userCreate',
+            'format' => 'html',
+            'filter' => User::dropdown(),
+            'value' => function($data) {
+                return $data->userCreateLabel;
+            },
+        ], \n";
+        } elseif($name=='userUpdate'){
+            echo "         [
+            'attribute' => 'userUpdate',
+            'format' => 'html',
+            'filter' => User::dropdown(),
+            'value' => function($data) {
+                return $data->userUpdateLabel;
+            },
+        ],  \n";
+            
+        }elseif($name=='createDate'){
+            echo "      [
+            'attribute' => 'createDate',
+            'filterType' => GridView::FILTER_DATE,
+            'format' => 'raw',
+            'width' => '170px',
+            'filterWidgetOptions' => [
+                'pluginOptions' => ['format' => 'yyyy-mm-dd']
+            ],
+        ],    \n";
+            
+        }elseif($name=='updateDate'){
+            echo "   [
+            'attribute' => 'updateDate',
+            'filterType' => GridView::FILTER_DATE,
+            'format' => 'raw',
+            'width' => '170px',
+            'filterWidgetOptions' => [
+                'pluginOptions' => ['format' => 'yyyy-mm-dd']
+            ],
+        ],";
+        }
+        
+        
+        else 
+            echo "            '" . $name . "',\n";
+        
     }
 } else {
-    foreach ($generator->getTableSchema()->columns as $column) {
+    foreach ($tableSchema->columns as $column) {
         $format = $generator->generateColumnFormat($column);
-        echo "            '" . $column->name . ($format === 'text' ? "" : ":" . $format) . "',\n";
+        $name = $column->name;
+        if($name=='image'){ ?>
+            ['attribute' => 'image','format' => 'image','value' => $model->thumbnailTrue],
+        <?php } elseif($name=='userCreate'){ ?>
+             [
+                'attribute' => 'userCreate',
+                'value' => $model->userCreateLabel,
+            ],
+        <?php } elseif($name=='userUpdate'){ ?>
+            [
+                'attribute' => 'userUpdate',
+                'value' => $model->userUpdateLabel,
+            ],
+            
+        <?php }elseif($name=='createDate'){ ?>
+            [
+                'attribute' => 'createDate',
+                'value' => $model->createDate,
+            ],
+            
+        <?php }elseif($name=='updateDate'){ ?>
+            [
+                'attribute' => 'updateDate',
+                'value' => $model->updateDate,
+            ],
+                
+        <?php } else 
+            //echo "            '" . $format . "',\n";
+        
+            echo "            '" . $column->name . ($format === 'text' ? "" : ":" . $format) . "',\n";
+        
     }
 }
 ?>
-        ],
-    ]) ?>
+        ]]) ;?>
 
 </div>
