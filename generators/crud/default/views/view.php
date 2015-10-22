@@ -22,12 +22,13 @@ $this->title = $model-><?= $generator->getNameAttribute() ?>;
 $this->params['breadcrumbs'][] = ['label' => <?= $generator->generateString(Inflector::pluralize(Inflector::camel2words(StringHelper::basename($generator->modelClass)))) ?>, 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="<?= Inflector::camel2id(StringHelper::basename($generator->modelClass)) ?>-view">
+<div class="<?= Inflector::camel2id(StringHelper::basename($generator->modelClass)) ?>-view no-print">
 
     <h1><?= "<?= " ?>Html::encode($this->title) ?></h1>
 
     <p>
-        <?= "<?= " ?>Html::a(<?= $generator->generateString('Update') ?>, ['update', <?= $urlParams ?>], ['class' => 'btn btn-primary']) ?>
+                <?= "<?= " ?>Html::a(<?= $generator->generateString('Create') ?>, ['create'], ['class' => 'btn btn-default']) ?>
+        <?= "<?= " ?>Html::a(<?= $generator->generateString('Update') ?>, ['update', <?= $urlParams ?>], ['class' => 'btn btn-default']) ?>
         <?= "<?= " ?>Html::a(<?= $generator->generateString('Delete') ?>, ['delete', <?= $urlParams ?>], [
             'class' => 'btn btn-danger',
             'data' => [
@@ -35,6 +36,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 'method' => 'post',
             ],
         ]) ?>
+                <?= "<?= " ?>Html::a(<?= $generator->generateString('Print Qrcode') ?>, ['id' => 'print'], ['id' => 'print', 'class' => 'btn btn-default']) ?>
+
     </p>
 
     <?= "<?= " ?>DetailView::widget([
@@ -108,12 +111,12 @@ if (($tableSchema = $generator->getTableSchema()) === false) {
         <?php } elseif($name=='userCreate'){ ?>
              [
                 'attribute' => 'userCreate',
-                'value' => $model->userCreateLabel,
+                'value' => Yii::$app->util->getUserId($model->userCreate)->username,
             ],
         <?php } elseif($name=='userUpdate'){ ?>
             [
                 'attribute' => 'userUpdate',
-                'value' => $model->userUpdateLabel,
+                'value' => Yii::$app->util->getUserId($model->userUpdate)->username,
             ],
             
         <?php }elseif($name=='createDate'){ ?>
@@ -122,6 +125,8 @@ if (($tableSchema = $generator->getTableSchema()) === false) {
                 'value' => $model->createDate,
             ],
             
+        <?php }elseif($name=='description'){ ?>
+            'description:html',
         <?php }elseif($name=='updateDate'){ ?>
             [
                 'attribute' => 'updateDate',
@@ -129,6 +134,7 @@ if (($tableSchema = $generator->getTableSchema()) === false) {
             ],
                 
         <?php } else 
+        
             //echo "            '" . $format . "',\n";
         
             echo "            '" . $column->name . ($format === 'text' ? "" : ":" . $format) . "',\n";
@@ -139,3 +145,10 @@ if (($tableSchema = $generator->getTableSchema()) === false) {
         ]]) ;?>
 
 </div>
+
+<img id="imgqr" style="display: none" alt="Embedded Image" src="http://sintret.com/site/qrcode?text=<?php echo "<?php ";?> echo $model->id; ?>&size=300&font-size=16&label=<?php echo "<?php ";?> echo $this->title   ; ?>" />
+<?php  echo "<?php ";?> $this->registerJs('$("#print").on("click", function(event ){
+    $("#imgqr").show();
+    event.preventDefault();
+window.print();
+});'); ?>
