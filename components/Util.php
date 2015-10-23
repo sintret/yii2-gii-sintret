@@ -37,7 +37,7 @@ class Util extends Component {
     }
 
     public static function templateExcel() {
-        return ("@vendor/sintret/yii2-gii-adminlte/templates/new.xls");
+        return ("@vendor/sintret/yii2-gii-sintret/templates/new.xls");
     }
 
     /**
