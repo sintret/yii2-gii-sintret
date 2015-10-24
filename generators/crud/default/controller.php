@@ -333,7 +333,7 @@ $log = 'log_<?= $modelClass ?>'. Yii::$app->user->id;
 Yii::$app->session->setFlash('success', 'Well done! successfully to Parsing data, see log on log upload menu! Please Waiting for processing indicator if available...  ');
 Yii::$app->session->set($log, $model->id);
 $notification = new \sintret\gii\models\Notification;
-$notification->title = 'parsing <?= $modelClass ?>';
+$notification->title = 'parsing';
 $notification->message = Yii::$app->user->identity->username . ' parsing <?= $modelClass ?> ';
 $notification->params = \yii\helpers\Json::encode(['model' => '<?= $modelClass ?>', 'id' => $model->id]);
 $notification->save();
