@@ -35,19 +35,28 @@ $this->params['breadcrumbs'][] = $this->title;
 <?php endif; ?>    
 
 <?= "<?php \n " ?>
-    $toolbars = [
-        ['content' =>
-            Html::a('<i class="glyphicon glyphicon-plus"></i>', ['<?= Inflector::camel2id(StringHelper::basename($generator->modelClass)) ?>/create'], ['type' => 'button', 'title' => 'Add ' . $this->title, 'class' => 'btn btn-success']) . ' ' .
-            Html::a('<i class="fa fa-file-excel-o"></i>', ['<?= Inflector::camel2id(StringHelper::basename($generator->modelClass)) ?>/parsing'], ['type' => 'button', 'title' => 'Parsing Excel ' . $this->title, 'class' => 'btn btn-warning']) . ' ' .
-            Html::button('<i class="fa fa-download"></i>', ['type' => 'button', 'title' => 'Excel Backup ' . $this->title, 'class' => 'btn btn-default','id'=>'backupExcel']) . ' ' .
-            Html::button('<i class="glyphicon glyphicon-trash"></i>', ['type' => 'button', 'title' => 'Delete Selected ' . $this->title, 'class' => 'btn btn-danger', 'id' => 'deleteSelected']) . ' ' .
-            Html::a('<i class="glyphicon glyphicon-repeat"></i>', ['<?= Inflector::camel2id(StringHelper::basename($generator->modelClass)) ?>/index','p_reset'=>true], ['data-pjax' => 0, 'class' => 'btn btn-default', 'title' => 'Reset Grid']). ' '
+   $contents_create = app\controllers\CController::accessTo('<?= Inflector::camel2id(StringHelper::basename($generator->modelClass)) ?>.create') ? Html::a('<i class="glyphicon glyphicon-plus"></i>', ['<?= Inflector::camel2id(StringHelper::basename($generator->modelClass)) ?>/create'], ['type' => 'button', 'title' => 'Add ' . $this->title, 'class' => 'btn btn-success', 'id' => '<?= Inflector::camel2id(StringHelper::basename($generator->modelClass)) ?>_btn']) . ' ' : '';
+    $contents_parsing = app\controllers\CController::accessTo('<?= Inflector::camel2id(StringHelper::basename($generator->modelClass)) ?>.parsing') ? Html::a('<i class="fa fa-file-excel-o"></i>', ['order/parsing'], ['type' => 'button', 'title' => 'Parsing Excel ' . $this->title, 'class' => 'btn btn-warning']) . ' ' : '';
+    $contents_excel = app\controllers\CController::accessTo('<?= Inflector::camel2id(StringHelper::basename($generator->modelClass)) ?>.excel') ? Html::button('<i class="fa fa-download"></i>', ['type' => 'button', 'title' => 'Excel Backup ' . $this->title, 'class' => 'btn btn-default', 'id' => 'backupExcel']) . ' ' : '';
+    $contents_delete_all = app\controllers\CController::accessTo('<?= Inflector::camel2id(StringHelper::basename($generator->modelClass)) ?>.delete-all') ? Html::button('<i class="glyphicon glyphicon-trash"></i>', ['type' => 'button', 'title' => 'Delete Selected ' . $this->title, 'class' => 'btn btn-danger', 'id' => 'deleteSelected']) : '';
 
-            
-        ],
+    $contents = $contents_create . $contents_parsing . $contents_excel . $contents_delete_all .
+            Html::a('<i class="glyphicon glyphicon-repeat"></i>', ['<?= Inflector::camel2id(StringHelper::basename($generator->modelClass)) ?>/index', 'p_reset' => true], ['data-pjax' => 0, 'class' => 'btn btn-default', 'title' => 'Reset Grid']) . ' ';
+    $toolbars = [
+        ['content' => $contents],
         ['content' => '{dynagridFilter}{dynagridSort}{dynagrid}'],
         '{export}',
     ];
+   $templatesButton = '';
+    if (app\controllers\CController::accessTo('<?= Inflector::camel2id(StringHelper::basename($generator->modelClass)) ?>.view')) {
+        $templatesButton .= '{view} ';
+    }
+    if (app\controllers\CController::accessTo('<?= Inflector::camel2id(StringHelper::basename($generator->modelClass)) ?>.update')) {
+        $templatesButton .= '{update} ';
+    }
+    if (app\controllers\CController::accessTo('<?= Inflector::camel2id(StringHelper::basename($generator->modelClass)) ?>.delete')) {
+        $templatesButton .= '{delete} ';
+    }
     $panels = [
         'heading' => '<h3 class="panel-title"><i class="glyphicon glyphicon-book"></i>  ' . $this->title . '</h3>',
         'before' => '<div style="padding-top: 7px;"><em>* The table at the right you can pull reports & personalize</em></div>',
@@ -74,26 +83,7 @@ if (($tableSchema = $generator->getTableSchema()) === false) {
         $name = $column->name;
         if($name=='image'){ ?>
             ['attribute' => 'image', 'format' => 'html', 'value' => function($data) { return $data->thumb;}],
-        <?php }  else if($name=='userUpdate'){ ?> 
-            [
-                        'attribute'=>'userUpdate',
-                        'filter'=>  User::dropdown(),
-                        'value' => function ($data){
-                            return Yii::$app->util->getUserId($data->userUpdate)->username;
-                        }
-                        ],
-        <?php }  else if($name=='userCreate'){ ?> 
-            [
-                        'attribute'=>'userCreate',
-                        'filter'=>  User::dropdown(),
-                        'value' => function ($data){
-                            return Yii::$app->util->getUserId($data->userCreate)->username;
-                        }
-                        ],
-        <?php }  else if($name=='description'){ ?> 
-            'description:html',
-        <?php }       
-            else 
+        <?php } else 
             //echo "            '" . $format . "',\n";
         
             echo "            '" . $column->name . ($format === 'text' ? "" : ":" . $format) . "',\n";
@@ -101,13 +91,12 @@ if (($tableSchema = $generator->getTableSchema()) === false) {
     }
 }
 ?>
-        [
+            
+            [
             'class' => 'kartik\grid\ActionColumn',
             'dropdown' => false,
             'vAlign' => 'middle',
-            'viewOptions' => ['title' => 'view', 'data-toggle' => 'tooltip'],
-            'updateOptions' => ['title' => 'update', 'data-toggle' => 'tooltip'],
-            'deleteOptions' => ['title' => 'delete', 'data-toggle' => 'tooltip'],
+            'template' => $templatesButton,
         ],
         [
             'class' => '\kartik\grid\CheckboxColumn',
